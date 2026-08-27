@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teacher Control</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .controls { margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        tr:nth-child(even) { background-color: #f2 f2 f2; }
+        tr:first-child { background-color: gold; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>ระบบวัดความเร็ว (Teacher)</h1>
+    <div class="controls">
+        <button onclick="startGame()" style="padding:10px 20px; background: green; color:white;">เริ่มเกม (3-2-1)</button>
+        <button onclick="resetGame()" style="padding:10px 20px; background: red; color:white;">รีเซ็ตรอบใหม่</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>อันดับ</th>
+                <th>ชื่อ</th>
+                <th>สถานะ</th>
+            </tr>
+        </thead>
+        <tbody id="leaderboard"></tbody>
+    </table>
+
+    <script>
+        const socket = io();
+
+        function startGame() {
+            socket.emit('start_game');
+        }
+
+        function resetGame() {
+            socket.emit('reset_game');
+            document.getElementById('leaderboard').innerHTML = '';
+        }
+
+        socket.on('update_leaderboard', (results) => {
+            const board = document.getElementById('leaderboard');
+            board.innerHTML = '';
+            results.forEach((res, index) => {
+                const row = `<tr>
+                    <td>${index + 1}</td>
+                    <td>${res.name}</td>
+                    <td>กดแล้ว!</td>
+                </tr>`;
+                board.innerHTML += row;
+            });
+        });
+    </script>
+</body>
+</html>

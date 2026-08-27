@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding-top: 50px; }
+        #clickBtn { 
+            width: 200px; height: 200px; font-size: 24px; border-radius: 50%; 
+            cursor: pointer; background-color: #ccc; border: none;
+        }
+        #clickBtn:enabled { background-color: #4CAF50; color: white; }
+        #status { font-size: 32px; margin-bottom: 20px; color: blue; }
+    </style>
+</head>
+<body>
+    <input type="text" id="name" placeholder="ใส่ชื่อของคุณ" style="padding:10px; font-size:18px;"><br><br>
+    <div id="status">รออาจารย์เริ่มเกม...</div>
+    <button id="clickBtn" disabled>กดเลย!</button>
+
+    <script>
+        const socket = io();
+        const btn = document.getElementById('clickBtn');
+        const statusText = document.getElementById('status');
+        const nameInput = document.getElementById('name');
+
+        socket.on('game_starting', () => {
+            let count = 3;
+            btn.disabled = true;
+            statusText.innerText = count;
+            
+            let countdown = setInterval(() => {
+                count--;
+                if (count <= 0) {
+                    clearInterval(countdown);
+                    statusText.innerText = "GO!!!";
+                    btn.disabled = false;
+                } else {
+                    statusText.innerText = count;
+                }
+            }, 1000);
+        });
+
+        btn.onclick = () => {
+            const name = nameInput.value.trim();
+            if (!name) return alert("กรุณาใส่ชื่อ!");
+            
+            socket.emit('submit_click', { name: name });
+            btn.disabled = true; // กดได้ครั้งเดียวต่อรอบ
+            statusText.innerText = "ส่งคำตอบแล้ว!";
+        };
+
+        socket.on('game_reset', () => {
+            btn.disabled = true;
+            statusText.innerText = "รออาจารย์เริ่มเกม...";
+        });
+    </script>
+</body>
+</html>
